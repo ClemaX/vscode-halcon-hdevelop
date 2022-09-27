@@ -7,10 +7,11 @@
     "vscode": "^1.71.0"
   },
   "categories": [
-    "Other"
+    "Programming Languages"
   ],
   "activationEvents": [
-    "onCommand:halcon-hdevelop.helloWorld"
+    "onCommand:halcon-hdevelop.helloWorld",
+    "onNotebook:halcon-hdevelop"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -18,6 +19,29 @@
       {
         "command": "halcon-hdevelop.helloWorld",
         "title": "Hello World"
+      }
+    ],
+    "languages": [{
+      "id": "hdevelop",
+      "aliases": ["Halcon HDevelop", "hdevelop"],
+      "extensions": [""],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "hdevelop",
+      "scopeName": "source.hdevelop",
+      "path": "./syntaxes/hdevelop.tmLanguage.json"
+    }],
+    "notebooks": [
+      {
+        "id": "halcon-hdevelop",
+        "type": "halcon-hdevelop",
+        "displayName": "Halcon HDevelop",
+        "selector": [
+          {
+            "filenamePattern": "*.hdvp"
+          }
+        ]
       }
     ]
   },
@@ -33,19 +57,20 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.71.0",
     "@types/glob": "^7.2.0",
     "@types/mocha": "^9.1.1",
     "@types/node": "16.x",
+    "@types/vscode": "^1.71.0",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
+    "@vscode/test-electron": "^2.1.5",
     "eslint": "^8.20.0",
+    "fast-xml-parser": "^4.0.10",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",
-    "typescript": "^4.7.4",
     "ts-loader": "^9.3.1",
+    "typescript": "^4.7.4",
     "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0",
-    "@vscode/test-electron": "^2.1.5"
+    "webpack-cli": "^4.10.0"
   }
 }

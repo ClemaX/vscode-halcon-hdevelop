@@ -1,0 +1,150 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Halcon HDevelop",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#storage"
+		},
+		{
+			"include": "#comment"
+		},
+		{
+			"include": "#constants"
+		},
+		{
+			"include": "#meta"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.hdevelop",
+				"match": "\\b(if|else|endif|while|for|return|try|catch)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.single.hdevelop",
+			"begin": "'",
+			"end": "'",
+			"patterns": [
+				{
+					"name": "constant.character.escape.hdevelop",
+					"match": "\\\\."
+				}
+			]
+		},
+		"storage": {
+			"patterns": [
+				{
+					"name": "storage.type.hdevelop",
+					"match": "\\b(tuple)\\b"
+				},
+				{
+					"name": "storage.modifier.hdevelop",
+					"match": "\\b(global)\\b"
+				}
+			]
+		},
+		"comment": {
+			"begin": "^(^[ \\t]+)?(?=\\*)",
+			"beginCaptures": {
+				"1": {
+					"name":  "punctuation.whitespace.comment.leading.hdevelop"
+				}
+			},
+			"end": "(?!\\G)",
+			"patterns": [
+				{
+					"name": "comment.line.star.hdevelop",
+					"begin": "\\*",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.hdevelop"
+						}
+					},
+					"end": "\\n"
+				}
+			]
+		},
+		"meta": {
+			"patterns": [
+				{
+					"name": "meta.variable.hdevelop",
+					"match": "(\\s*)([$_a-zA-Z][$_a-zA-Z0-9]*)\\s*(:=)",
+					"captures": {
+						"1": {
+							"name": "punctuation.whitespace.variable.leading.hdevelop"
+						},
+						"2": {
+							"name": "variable.name"
+						},
+						"3": {
+							"name": "keyword.operator.assign.hdevelop"
+						}
+					}
+				}
+			]
+		},
+		"constants": {
+			"patterns": [
+				{
+					"match": "\\b((0(x|X)[0-9a-fA-F]+)|([0-9]+(\\.[0-9]+)?))\\b",
+					"name": "constant.numeric.js"
+				},
+				{
+					"begin": "'",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.hdevelop"
+						}
+					},
+					"end": "'",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.end.hdevelop"
+						}
+					},
+					"name": "string.quoted.single.hdevelop",
+					"patterns": [
+						{
+							"match": "\\\\(x\\h{2}|[0-2][0-7]{,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.)",
+							"name": "constant.character.escape.hdevelop"
+						}
+					]
+				},
+				{
+					"name": "constant.language.hdevelop",
+					"match": "\\b(true|false)\\b"
+				}
+			]
+		},
+		"support": {
+			"patterns": [
+			]
+		},
+		"function-params": {
+			"patterns": [
+				{
+					"begin": "(?![\\s,)])",
+					"end": "(?=[,)])",
+					"patterns": [
+						{
+							"match": "\\G[$_a-zA-Z][$_a-zA-Z0-9]*",
+							"name": "variable.parameter.function.hdevelop"
+						},
+						{
+							"include": "$self"
+						}
+					]
+				}
+			]
+		}
+	},
+	"scopeName": "source.hdevelop"
+}
