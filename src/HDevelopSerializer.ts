@@ -45,7 +45,6 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
   });
   private static readonly serializer = new XMLBuilder({
     preserveOrder: true,
-    format: true,
     ignoreAttributes: false,
     suppressEmptyNode: true,
   });
@@ -115,9 +114,10 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
     const originalContent = data.metadata!.originalContent as XMLData;
 
     const body: ProcedureBody = data.cells[0].value.split('\n').map((line) => {
-        return line.startsWith('*') ? {c: [{'#text': line}]} : {l: [{'#text': line}]};
+        return line.length === 0 || line.startsWith('*') ? {c: [{'#text': line}]} : {l: [{'#text': line}]};
     });
 
+    originalContent[0][':@']['@_version'] = '1.0'
     originalContent[1]!.hdevelop![0].procedure[1].body = body;
 
     const fileContents = HDevelopSerializer.serializer.build(originalContent);
