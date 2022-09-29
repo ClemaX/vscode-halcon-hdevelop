@@ -38,7 +38,10 @@ type Procedure = [
 
 type HDevelopData = [{ procedure: Procedure }];
 
-type XMLHeader = {':@': [{'@_version': string}]}
+type XMLHeader = {
+  '?xml': [{'#text': string}],
+  ':@': {'@_version': string, '@_encoding': string}
+}
 
 type XMLData = [XMLHeader, {hdevelop: HDevelopData}];
 
@@ -69,15 +72,21 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
     const decodedContent = HDevelopSerializer.textDecoder.decode(fileContent);
     const data = HDevelopSerializer.parser.parse(decodedContent) as XMLData;
 
+    if (data.length < 1 || data[0][":@"] === undefined || data[0][":@"]["@_version"] === undefined) {
+      throw "Invalid file: Could not find XML header and version!";
+    }
+
     if (data.length < 2 || data[1].hdevelop === undefined) {
-      throw "Invalid file: Could not find hdevelop element!"
+      throw "Invalid file: Could not find hdevelop element!";
     }
 
     if (data[1].hdevelop[0].procedure === undefined || data[1].hdevelop[0].procedure.length < 3
       || data[1].hdevelop[0].procedure[0].interface === undefined || data[1].hdevelop[0].procedure[1].body === undefined || data[1].hdevelop[0].procedure[2].docu === undefined) {
       throw "Invalid file: Could not find procedure elements!";
     }
-  
+
+    data[0][":@"]["@_version"] = "1.0";
+
     return data;
   }
 
@@ -178,17 +187,44 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
     });
   }
 
+  private static serializeAPIParameters(cell: vscode.NotebookCellData): ProcedureParameter[] {
+    return cell.value.split('\n').map((line) => {
+      const groups = line.match("^\\s*(iconic|ctrl)\\s+([$_a-zA-Z][$_a-zA-Z0-9]*)\\s*(?:\\[(\\d+)\\])?\\s*$")
+
+      if (groups === null) {
+        throw `Cannot save file: Invalid API format at: '${line}'!`
+      }
+
+      const [_, baseType, name, dimension] = groups;
+
+      const dimensionCount = dimension !== undefined ? Number(dimension) : 0;
+
+      return {":@": {"@_base_type": baseType, "@_dimension": dimensionCount, "@_name": name}, par: []};
+    })
+  }
+
+  private static serializeAPI(cells: vscode.NotebookCellData[]): ProcedureAPI {
+    return [
+      {io: HDevelopSerializer.serializeAPIParameters(cells[0])},
+      {oo: HDevelopSerializer.serializeAPIParameters(cells[1])},
+      {ic: HDevelopSerializer.serializeAPIParameters(cells[2])},
+      {oc: HDevelopSerializer.serializeAPIParameters(cells[3])},
+    ];
+  }
+
   serializeNotebook(
     data: HDevelopNotebookData,
     token: vscode.CancellationToken
   ): Uint8Array {
-    const originalContent = data.metadata.originalContent;
+    const content = data.metadata.originalContent;
 
-    const body: ProcedureBody = HDevelopSerializer.serializeCodeCell(data.cells[0])
+    const api: ProcedureAPI = HDevelopSerializer.serializeAPI(data.cells);
+    const body: ProcedureBody = HDevelopSerializer.serializeCodeCell(data.cells[4])
 
-    originalContent[1].hdevelop[0].procedure[1].body = body;
+    content[1].hdevelop[0].procedure[1].body = body;
+    content[1].hdevelop[0].procedure[0].interface = api;
 
-    const fileContents = HDevelopSerializer.serializer.build(originalContent);
+    const fileContents = HDevelopSerializer.serializer.build(content);
 
     return HDevelopSerializer.textEncoder.encode(fileContents);
   }
