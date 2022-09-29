@@ -14,6 +14,10 @@
     "onNotebook:halcon-hdevelop"
   ],
   "main": "./dist/extension.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ClemaX/vscode-halcon-hdevelop.git"
+  },
   "contributes": {
     "commands": [
       {
@@ -24,14 +28,24 @@
     "languages": [
       {
         "id": "hdevelop",
-        "aliases": ["Halcon HDevelop", "hdevelop"],
-        "extensions": [""],
+        "aliases": [
+          "Halcon HDevelop",
+          "hdevelop"
+        ],
+        "extensions": [
+          ""
+        ],
         "configuration": "./language-configuration.json"
       },
       {
         "id": "hdevelop.api",
-        "aliases": ["Halcon HDevelop API", "hdevelop.api"],
-        "extensions": [""],
+        "aliases": [
+          "Halcon HDevelop API",
+          "hdevelop.api"
+        ],
+        "extensions": [
+          ""
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
