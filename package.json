@@ -21,17 +21,32 @@
         "title": "Hello World"
       }
     ],
-    "languages": [{
-      "id": "hdevelop",
-      "aliases": ["Halcon HDevelop", "hdevelop"],
-      "extensions": [""],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "hdevelop",
-      "scopeName": "source.hdevelop",
-      "path": "./syntaxes/hdevelop.tmLanguage.json"
-    }],
+    "languages": [
+      {
+        "id": "hdevelop",
+        "aliases": ["Halcon HDevelop", "hdevelop"],
+        "extensions": [""],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "hdevelop.api",
+        "aliases": ["Halcon HDevelop API", "hdevelop.api"],
+        "extensions": [""],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "hdevelop",
+        "scopeName": "source.hdevelop",
+        "path": "./syntaxes/hdevelop.tmLanguage.json"
+      },
+      {
+        "language": "hdevelop.api",
+        "scopeName": "source.hdevelop.api",
+        "path": "./syntaxes/hdevelop.api.tmLanguage.json"
+      }
+    ],
     "notebooks": [
       {
         "id": "halcon-hdevelop",
