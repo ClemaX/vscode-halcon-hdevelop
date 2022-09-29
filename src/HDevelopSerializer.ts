@@ -1,20 +1,20 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from "vscode";
 import { TextDecoder, TextEncoder } from "util";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 import { HDevelopFormatter } from "./HDevelopFormatter";
-
-interface RawNotebookCell {
-  language: string;
-  value: string;
-  kind: vscode.NotebookCellKind;
-}
 
 interface ProcedureParameter {
   ':@': {'@_base_type': string, '@_dimension': number; '@_name': string};
   par: [];
 }
 
-type ProcedureAPI = [{io: ProcedureParameter[]}, {oo: ProcedureParameter[]}, {ic: ProcedureParameter[]}, {oc: ProcedureParameter[]}];
+type ProcedureAPI = [
+  {io: ProcedureParameter[]},
+  {oo: ProcedureParameter[]},
+  {ic: ProcedureParameter[]},
+  {oc: ProcedureParameter[]}
+];
 
 type TextNode = [{ "#text"?: string }];
 
@@ -28,12 +28,17 @@ interface StatementNode {
 
 type ProcedureBody = (StatementNode | CommentNode)[];
 
-interface ProcedureDocu {}
+interface ProcedureDocuParameter {
+  'parameter': [];
+  ':@': {'@_id': string};
+}
+
+type ProcedureDocu = [{parameters: ProcedureDocuParameter[]}];
 
 type Procedure = [
   { interface: ProcedureAPI },
   { body: ProcedureBody },
-  { docu: ProcedureDocu }
+  { docu: ProcedureDocu, ':@': {'@_id': string} }
 ];
 
 type HDevelopData = [{ procedure: Procedure }];
@@ -41,7 +46,7 @@ type HDevelopData = [{ procedure: Procedure }];
 type XMLHeader = {
   '?xml': [{'#text': string}],
   ':@': {'@_version': string, '@_encoding': string}
-}
+};
 
 type XMLData = [XMLHeader, {hdevelop: HDevelopData}];
 
@@ -73,16 +78,16 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
     const data = HDevelopSerializer.parser.parse(decodedContent) as XMLData;
 
     if (data.length < 1 || data[0][":@"] === undefined || data[0][":@"]["@_version"] === undefined) {
-      throw "Invalid file: Could not find XML header and version!";
+      throw new Error("Invalid file: Could not find XML header and version!");
     }
 
     if (data.length < 2 || data[1].hdevelop === undefined) {
-      throw "Invalid file: Could not find hdevelop element!";
+      throw new Error("Invalid file: Could not find hdevelop element!");
     }
 
     if (data[1].hdevelop[0].procedure === undefined || data[1].hdevelop[0].procedure.length < 3
       || data[1].hdevelop[0].procedure[0].interface === undefined || data[1].hdevelop[0].procedure[1].body === undefined || data[1].hdevelop[0].procedure[2].docu === undefined) {
-      throw "Invalid file: Could not find procedure elements!";
+      throw new Error("Invalid file: Could not find procedure elements!");
     }
 
     data[0][":@"]["@_version"] = "1.0";
@@ -110,8 +115,6 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
   private deserializeCodeCell(data: XMLData): vscode.NotebookCellData {
     const procedure = data[1].hdevelop[0].procedure;
     const codeCellData = this.deserializeBody(procedure[1].body);
-
-    console.debug(data[1].hdevelop[0].procedure[0].interface)
 
     return new vscode.NotebookCellData(vscode.NotebookCellKind.Code, codeCellData, 'hdevelop');
   }
@@ -192,7 +195,7 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
       const groups = line.match("^\\s*(iconic|ctrl)\\s+([$_a-zA-Z][$_a-zA-Z0-9]*)\\s*(?:\\[(\\d+)\\])?\\s*$")
 
       if (groups === null) {
-        throw `Cannot save file: Invalid API format at: '${line}'!`
+        throw new Error(`Cannot save file: Invalid API format at: '${line}'!`);
       }
 
       const [_, baseType, name, dimension] = groups;
@@ -212,6 +215,23 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
     ];
   }
 
+  private static getAPIParameterNames(api: ProcedureAPI): string[] {
+    return [
+      ...api[0].io.map((parameter) => parameter[":@"]["@_name"]),
+      ...api[1].oo.map((parameter) => parameter[":@"]["@_name"]),
+      ...api[2].ic.map((parameter) => parameter[":@"]["@_name"]),
+      ...api[3].oc.map((parameter) => parameter[":@"]["@_name"]),
+    ];
+  }
+
+  private static generateDocu(api: ProcedureAPI): ProcedureDocu {
+    const parameterNames = HDevelopSerializer.getAPIParameterNames(api).sort();
+
+    return [{
+      parameters: parameterNames.map(name => ({":@": {"@_id": name}, parameter: []}))
+    }];
+  }
+ 
   serializeNotebook(
     data: HDevelopNotebookData,
     token: vscode.CancellationToken
@@ -219,10 +239,15 @@ export class HDevelopSerializer implements vscode.NotebookSerializer {
     const content = data.metadata.originalContent;
 
     const api: ProcedureAPI = HDevelopSerializer.serializeAPI(data.cells);
-    const body: ProcedureBody = HDevelopSerializer.serializeCodeCell(data.cells[4])
+    const body: ProcedureBody = HDevelopSerializer.serializeCodeCell(data.cells[4]);
+    const docu: ProcedureDocu = HDevelopSerializer.generateDocu(api);
 
-    content[1].hdevelop[0].procedure[1].body = body;
     content[1].hdevelop[0].procedure[0].interface = api;
+    content[1].hdevelop[0].procedure[1].body = body;
+    // TODO: Preserve existing docu and extend using docstring comments
+    content[1].hdevelop[0].procedure[2].docu = docu;
+
+    //console.debug(content[1].hdevelop[0].procedure[2])
 
     const fileContents = HDevelopSerializer.serializer.build(content);
 
