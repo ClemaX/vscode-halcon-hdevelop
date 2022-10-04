@@ -10,7 +10,6 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onCommand:halcon-hdevelop.helloWorld",
     "onNotebook:halcon-hdevelop"
   ],
   "main": "./dist/extension.js",
