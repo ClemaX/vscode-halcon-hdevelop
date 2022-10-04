@@ -1,9 +1,7 @@
 # Change Log
 
-All notable changes to the "halcon-hdevelop" extension will be documented in this file.
+## 1.0.0
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+- Provide syntax highlighting for HDevelop language.
+- Parse HDevelop procedure XML into VSCode Notebook.
+- Serialize edited procedure into Halcon XML.
