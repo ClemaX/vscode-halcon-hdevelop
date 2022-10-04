@@ -18,6 +18,10 @@
     "type": "git",
     "url": "https://github.com/ClemaX/vscode-halcon-hdevelop.git"
   },
+  "bugs": {
+    "url": "https://github.com/ClemaX/vscode-halcon-hdevelop/vscode-wordcount/issues",
+    "email": "dont@trytofool.me"
+  },
   "contributes": {
     "commands": [
     ],
