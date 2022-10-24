@@ -1,9 +1,8 @@
-import exp = require('constants');
 import * as vscode from 'vscode';
 
 export class HDevelopFormatter implements vscode.DocumentFormattingEditProvider {
-    private static readonly controlExpression = new RegExp('^(\s*)(if|else|endif|while|for|try|catch|endtry)');
-    private static readonly controlTerminators: Map<string, string[]> = new Map([["if", ['endif', 'else']], ["else", ['endif']], ["try", ['catch', 'endtry']], ["catch", ['endtry']]]);
+    private static readonly controlExpression = new RegExp('^(\s*)(if|else|endif|while|for|endfor|try|catch|endtry)');
+    private static readonly controlTerminators: Map<string, string[]> = new Map([["if", ['endif', 'else']], ["else", ['endif']], ["for", ["endfor"]], ["try", ['catch', 'endtry']], ["catch", ['endtry']]]);
     private static readonly indentedContentExpression = new RegExp('^(\s*).');
 
     formatRawLines(lines: string[]) {

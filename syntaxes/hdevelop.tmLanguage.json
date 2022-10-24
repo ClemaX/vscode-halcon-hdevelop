@@ -25,7 +25,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.hdevelop",
-				"match": "\\b(if|else|endif|while|for|return|try|catch|endtry)\\b"
+				"match": "\\b(if|else|endif|while|for|endfor|return|try|catch|endtry)\\b"
 			}]
 		},
 		"strings": {
